@@ -1,0 +1,60 @@
+# =========================
+# Foldery budowania (CMake)
+# =========================
+build/
+build-*/
+out/
+bin/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# =========================
+# Pliki binarne i kompilacji
+# =========================
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.lib
+*.exp
+
+# =========================
+# Środowisko VS Code
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# =========================
+# Pełne Visual Studio (Kompilator MSVC)
+# =========================
+.vs/
+*.user
+*.suo
+*.db
+*.opendb
+*.VC.db
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# =========================
+# Pliki systemowe
+# =========================
+.DS_Store
+Thumbs.db
