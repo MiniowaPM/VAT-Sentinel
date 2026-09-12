@@ -32,6 +32,7 @@ add_executable(VATSentinel
     src/Services/WlApiClient.cpp
     src/Services/CompanyDataAggregator.cpp
     src/Services/KrsApiClient.cpp
+    src/Data/CsvTransactionReader.cpp
 )
 
 target_include_directories(VATSentinel PUBLIC include)

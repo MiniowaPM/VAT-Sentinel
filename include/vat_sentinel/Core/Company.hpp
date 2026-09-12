@@ -29,13 +29,13 @@ struct Company {
     Address registeredAddress;
 
     // Z Białej Listy VAT
-    bool isActiveVat;
+    bool isActiveVat = false;
     std::vector<std::string> registeredBankAccounts;
     std::string registrationDate;
 
     // Z KRS
-    double shareCapital;
-    bool isInBankruptcy;
+    double shareCapital = 0.0; 
+    bool isInBankruptcy = false;
     std::vector<BoardMember> boardMembers;
 
     // Z REGON

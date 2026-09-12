@@ -60,24 +60,27 @@ void KrsApiClient::enrich(Core::Company& company) {
                 }
             }
 
+            // Wyciąganie Zarządu (Dział 2)
             auto reprezentacja = odp["dzial2"]["reprezentacja"];
             if (!reprezentacja.is_null()) {
-                auto osoby = reprezentacja["osobyWchodzaceWSkladOrganu"];
-                for (const auto& osoba : osoby) {
-                    Core::BoardMember member;
-                    member.firstName = osoba.value("imiona", "Brak imienia");
-                    member.lastName = osoba.value("nazwisko", "Brak nazwiska");
-
-                    auto id = osoba["identyfikator"];
-                    if (!id.is_null()) {
-                        member.personalId = id.value("pesel", "Brak PESEL");
+                auto organ = reprezentacja["organUprawnionyDoReprezentacjiPodmiotu"];
+                if (!organ.is_null() && !organ["osobyWchodzaceWSkladOrganu"].is_null()) {
+                    auto osoby = organ["osobyWchodzaceWSkladOrganu"];
+                    for (const auto& osoba : osoby) {
+                        Core::BoardMember member;
+                        member.firstName = osoba.value("imiona", "Brak imienia");
+                        member.lastName = osoba.value("nazwisko", "Brak nazwiska");
+                        
+                        auto id = osoba["identyfikator"];
+                        if (!id.is_null()) {
+                            member.personalId = id.value("pesel", "Brak PESEL");
+                        }
+                        
+                        member.role = osoba.value("funkcjaWOrganie", "Członek Zarządu");
+                        company.boardMembers.push_back(member);
                     }
-
-                    member.role = osoba.value("funkcjaWOrganie", "Członek Zarządu");
-                    company.boardMembers.push_back(member);
+                    std::cout << "[KrsApiClient] Znaleziono " << company.boardMembers.size() << " czlonkow zarzadu.\n";
                 }
-                std::cout << "[KrsApiClient] Znaleziono " << company.boardMembers.size()
-                          << " czlonkow zarzadu.\n";
             }
         } catch (const json::exception& e) {
             std::cerr << "[KrsApiClient] Blad parsowania JSON: " << e.what() << "\n";
