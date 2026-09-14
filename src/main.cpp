@@ -1,36 +1,35 @@
-#include "vat_sentinel/Core/Company.hpp"
-#include "vat_sentinel/Core/Transaction.hpp"
-#include "vat_sentinel/Services/CompanyDataAggregator.hpp"
-#include "vat_sentinel/Services/KrsApiClient.hpp"
-#include "vat_sentinel/Services/WlApiClient.hpp"
-#include "vat_sentinel/Data/CsvTransactionReader.hpp"
-
-#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <iomanip>
 
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
+#include "vat_sentinel/Core/Company.hpp"
+#include "vat_sentinel/Core/Transaction.hpp"
+#include "vat_sentinel/Services/CompanyDataAggregator.hpp"
+#include "vat_sentinel/Services/WlApiClient.hpp"
+#include "vat_sentinel/Services/KrsApiClient.hpp"
+#include "vat_sentinel/Data/CsvTransactionReader.hpp"
+#include "vat_sentinel/Graph/GraphRepository.hpp" // NOWE: Nagłówek Grafu
+
 int main() {
-    #ifdef _WIN32
-        SetConsoleOutputCP(CP_UTF8);
-    #endif
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     std::cout << "=== VAT Sentinel: Inicjalizacja Systemu ===\n\n";
 
-Services::CompanyDataAggregator aggregator;
+    Services::CompanyDataAggregator aggregator;
     aggregator.addEnricher(std::make_unique<Services::WlApiClient>());
     aggregator.addEnricher(std::make_unique<Services::KrsApiClient>());
 
-Data::CsvTransactionReader csvReader;
-
-
-// C:/Users/miko/source/repos/VAT Sentinel/data/transactions.csv
-std::string csvPath = "../data/transactions.csv"; 
+    Data::CsvTransactionReader csvReader;
+    std::string csvPath = "../data/transactions.csv"; 
     
-    std::cout << "--- Wczytywanie transakcji ---\n";
+    std::cout << "--- ETAP 1: Wczytywanie transakcji ---\n";
     auto transactions = csvReader.read(csvPath);
     
     if (transactions.empty()) {
@@ -38,9 +37,9 @@ std::string csvPath = "../data/transactions.csv";
         return 1;
     }
 
-auto uniqueNips = csvReader.getUniqueNips(transactions);
+    auto uniqueNips = csvReader.getUniqueNips(transactions);
 
-std::cout << "\n--- Pobieranie danych o podmiotach ---\n";
+    std::cout << "\n--- ETAP 2: Pobieranie danych o podmiotach (OSINT) ---\n";
     std::vector<Core::Company> companyProfiles;
     
     for (const auto& nip : uniqueNips) {
@@ -49,13 +48,32 @@ std::cout << "\n--- Pobieranie danych o podmiotach ---\n";
         companyProfiles.push_back(profile);
     }
 
-std::cout << "\n=== RAPORT KONCOWY ===\n";
+    std::cout << "\n--- ETAP 3: Budowa Sieci Finansowej (Graph Engine) ---\n";
+    Graph::GraphRepository graph;
+
     for (const auto& profile : companyProfiles) {
+        graph.addNode(profile);
+    }
+
+    for (const auto& tx : transactions) {
+        graph.addEdge(tx);
+    }
+
+    std::cout << "[Graph Engine] Inicjalizacja pamieci RAM zakonczona!\n";
+    std::cout << "[Graph Engine] Liczba wezlow (zbadanych firm): " << graph.getNodeCount() << "\n";
+    std::cout << "[Graph Engine] Liczba krawedzi (przelewow):      " << graph.getEdgeCount() << "\n";
+
+    std::cout << "\n=== RAPORT KONCOWY ===\n";
+    for (const auto& nip : uniqueNips) {
+        Core::Company profile = graph.getNode(nip);
+        auto outgoingTxs = graph.getOutgoingTransactions(nip);
+
         std::cout << "NIP:\t\t" << profile.nip << "\n";
         std::cout << "Nazwa:\t\t" << (profile.name.empty() ? "BRAK DANYCH" : profile.name) << "\n";
         std::cout << "Kapital:\t" << std::fixed << std::setprecision(2) << profile.shareCapital << " PLN\n";
-        std::cout << "Status VAT:\t" << (profile.isActiveVat ? "[CZTYNNY]" : "[NIEAKTYWNY / WYKRESLONY - RYZYKO]") << "\n";
+        std::cout << "Przelewy wych.:\t" << outgoingTxs.size() << " transakcji\n";
         std::cout << "--------------------------------------\n";
     }
+
     return 0;
 }
