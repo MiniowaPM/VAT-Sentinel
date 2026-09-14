@@ -1,21 +1,21 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include "vat_sentinel/Core/Company.hpp"
 #include "vat_sentinel/Core/Transaction.hpp"
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace Graph {
 
 class GraphRepository {
-private:
+  private:
     // Węzły: NIP -> Profil Firmy
     std::unordered_map<std::string, Core::Company> nodes;
-    
+
     // Krawędzie (Lista sąsiedztwa): NIP Nadawcy -> Lista Transakcji Wychodzących
     std::unordered_map<std::string, std::vector<Core::Transaction>> adjacencyList;
 
-public:
+  public:
     GraphRepository() = default;
 
     // Dodawanie elementów do grafu

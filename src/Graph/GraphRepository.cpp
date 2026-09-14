@@ -2,9 +2,7 @@
 
 namespace Graph {
 
-void GraphRepository::addNode(const Core::Company& company) {
-    nodes[company.nip] = company;
-}
+void GraphRepository::addNode(const Core::Company& company) { nodes[company.nip] = company; }
 
 void GraphRepository::addEdge(const Core::Transaction& transaction) {
     adjacencyList[transaction.senderNip].push_back(transaction);
@@ -22,7 +20,8 @@ Core::Company GraphRepository::getNode(const std::string& nip) const {
     return Core::Company();
 }
 
-std::vector<Core::Transaction> GraphRepository::getOutgoingTransactions(const std::string& nip) const {
+std::vector<Core::Transaction>
+GraphRepository::getOutgoingTransactions(const std::string& nip) const {
     auto it = adjacencyList.find(nip);
     if (it != adjacencyList.end()) {
         return it->second;
@@ -30,9 +29,7 @@ std::vector<Core::Transaction> GraphRepository::getOutgoingTransactions(const st
     return {};
 }
 
-size_t GraphRepository::getNodeCount() const {
-    return nodes.size();
-}
+size_t GraphRepository::getNodeCount() const { return nodes.size(); }
 
 size_t GraphRepository::getEdgeCount() const {
     size_t totalEdges = 0;
