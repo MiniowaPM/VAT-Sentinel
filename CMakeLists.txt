@@ -34,7 +34,9 @@ add_executable(VATSentinel
     src/Services/KrsApiClient.cpp
     src/Data/CsvTransactionReader.cpp
     src/Graph/GraphRepository.cpp
-    )
+    src/Analytics/CycleDetectionRule.cpp
+    src/Analytics/RiskAnalyzer.cpp
+)
 
 target_include_directories(VATSentinel PUBLIC include)
 
